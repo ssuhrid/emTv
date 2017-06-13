@@ -1,20 +1,25 @@
 #!/usr/bin/python
 
 def readText():
-    
-    fo = open("data/messages.txt", "r+")
-    # str = fo.read(10);
+
     mess = [];
 
-    for i in range(0,5):
-        mess.append(fo.readline());
+    try:
+        fo = open("data/messages.txt", "r+");
 
-    for i in range(0,5):
-        print mess[i];
+        for i in range(0,5):
+            mess.append(fo.readline());
+        # Close opend file
+        fo.close();
+    except:
+        pass
 
-    # print "Read String is : ", mess1
-    # print "Read String is : ", mess2
-    # Close opend file
-    fo.close()
+    return mess
 
-readText()
+mess=[];
+while True:
+    temp=readText();
+    if temp!=mess and temp!=[] :
+        mess=temp;
+        for i in range(0,5):
+            print mess[i];
