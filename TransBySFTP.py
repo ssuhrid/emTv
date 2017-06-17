@@ -2,12 +2,27 @@ import sys
 import pysftp
 import time
 
+
 cnopts = pysftp.CnOpts()
 cnopts.hostkeys = None  # disable host key checking.
 # cnopts.compression = True
 
+def printTotals(transferred, toBeTransferred):
+    # print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
+    percent = float(transferred)/toBeTransferred*100
+    print '%0.1f' % (percent),'%'
+
 try:
-    srv = pysftp.Connection('192.168.1.4', username='pi', password='raspberry',cnopts=cnopts,port=22)
+
+    pass
+except Exception as exp:
+    print (type(exp))
+    print (exp)
+    pass
+
+try:
+    srv = pysftp.Connection('raspberrypi3', username='pi', password='raspberry',cnopts=cnopts,port=22)
+    # srv.timeout(1)
     srv.chdir('ssuhrid/lan/data')
 
     # Get the directory and file listing
@@ -16,7 +31,9 @@ try:
     # for i in data:
     #     print i
     start = time.time()
-    srv.put('data/newfolder/video.mkv')
+    print 'start'
+    srv.put('data/video.mkv',callback=printTotals)
+
     end = time.time()
 
     transferTime = end-start
@@ -33,3 +50,9 @@ except Exception as inst:
     # print('x =', x)
     # print('y =', y)
     # if ''
+
+def toggle_geom(self,event):
+    geom=self.master.winfo_geometry()
+    print(geom,self._geom)
+    self.master.geometry(self._geom)
+    self._geom=geom

@@ -3,7 +3,10 @@ import os
 
 # SOURCE_PATH = 'NODE3/F_Rai\'s/lan-tv/data'
 # SOURCE_PATH = r"\\NODE3\F_Rai's\lan-tv\data"
-SOURCE_PATH = r"//192.168.1.10/F_Rai's/lan-tv/data"
+REMOTE_PATH = r"//raspberrypi3/users"
+
+SOURCE_PATH = r"data"
+
 source = os.listdir(SOURCE_PATH)
 
 destination = "data/newfolder/"

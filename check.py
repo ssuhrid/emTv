@@ -1,31 +1,14 @@
-import sys
-import pysftp
+#!/usr/bin/python           # This is client.py file
 
-cnopts = pysftp.CnOpts()
-cnopts.hostkeys = None  # disable host key checking.
-cnopts.compression = True
+import socket               # Import socket module
 
-try:
-    srv = pysftp.Connection('192.168.1.4', username='pi', password='raspberry',cnopts=cnopts,port=22)
-    srv.chdir('ssuhrid/lan/data')
+s = socket.socket()         # Create a socket object
+host = socket.gethostname() # Get local machine name
+port = 22             # Reserve a port for your service.
 
-    # Get the directory and file listing
-    # data = srv.listdir()
-    # # Prints out the directories and files, line by line
-    # for i in data:
-    #     print i
+socket.get
+print host
 
-    srv.put('data/newfolder/video.mkv', preserve_mtime=True)
-
-    # Closes the connection
-    srv.close()
-
-except Exception as inst:
-    print(type(inst))    # the exception instance
-    # print(inst.args)     # arguments stored in .args
-    print(inst)          # __str__ allows args to be printed directly,
-                         # but may be overridden in exception subclasses
-    # x, y = inst.args     # unpack args
-    # print('x =', x)
-    # print('y =', y)
-    # if ''
+# s.connect((host, port))
+# print s.recv(1024)
+s.close                     # Close the socket when done

@@ -5,7 +5,7 @@ conn = SMBConnection('username','',' ',' ','',# use_ntlm_v2=True,
     # sign_options=SMBConnection.SIGN_WHEN_SUPPORTED,
     is_direct_tcp=True)
 
-connected = conn.connect('192.168.1.10',445)
+connected = conn.connect('raspberrypi3',445)
 Response = conn.listShares(timeout=30)
 
 for i in range(len(Response)):
