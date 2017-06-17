@@ -1,14 +1,39 @@
-#!/usr/bin/python           # This is client.py file
+while True:
+    # Read states of inputs
+    input_state1 = GPIO.input(17)
+    input_state2 = GPIO.input(18)
+    quite_video = GPIO.input(24)
 
-import socket               # Import socket module
+    # If GPIO(17) is shorted to ground
+    if input_state1 != last_state1:
+        if (player and not input_state1):
+            os.system('killall omxplayer.bin')
+            omxc = Popen(['omxplayer', '-b', movie1])
+            player = True
+        elif not input_state1:
+            omxc = Popen(['omxplayer', '-b', movie1])
+            player = True
 
-s = socket.socket()         # Create a socket object
-host = socket.gethostname() # Get local machine name
-port = 22             # Reserve a port for your service.
+    # If GPIO(18) is shorted to ground
+    elif input_state2 != last_state2:
+        if (player and not input_state2):
+            os.system('killall omxplayer.bin')
+            omxc = Popen(['omxplayer', '-b', movie2])
+            player = True
+        elif not input_state2:
+            omxc = Popen(['omxplayer', '-b', movie2])
+            player = True
 
-socket.get
-print host
+    # If omxplayer is running and GPIO(17) and GPIO(18) are NOT shorted to ground
+    elif (player and input_state1 and input_state2):
+        os.system('killall omxplayer.bin')
+        player = False
 
-# s.connect((host, port))
-# print s.recv(1024)
-s.close                     # Close the socket when done
+    # GPIO(24) to close omxplayer manually - used during debug
+    if quit_video == False:
+        os.system('killall omxplayer.bin')
+        player = False
+
+    # Set last_input states
+    last_state1 = input_state1
+    last_state2 = input_state2

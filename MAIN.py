@@ -10,16 +10,25 @@ def printTotals(transferred, toBeTransferred):
     _L2['text']=percent
     _root.update()
 
+def createControlFile(dataFile):
+    file = open('data/control.txt', 'w')
+    file.write('$')
+    if '.mkv' in dataFile:
+        file.write('v')
+    file.close()
+
+
 def transferFile(host,user,passwd,file):
     try:
         print 'start'
+        createControlFile(file)
         cnopts = pysftp.CnOpts()
         cnopts.hostkeys = None  # disable host key checking.
         cnopts.compression = True
 
-        srv = pysftp.Connection(host, username=user, password=passwd,cnopts=cnopts,port=22)
+        srv = pysftp.Connection('192.168.137.2', username=user, password=passwd,cnopts=cnopts,port=22)
         # srv.timeout(1)
-        srv.chdir('ssuhrid/lan/data')
+        srv.chdir('ssuhrid/emTv/buffer')
 
         # Get the directory and file listing
         # data = srv.listdir()
@@ -28,6 +37,7 @@ def transferFile(host,user,passwd,file):
         #     print i
         start = time.time()
         srv.put(file,callback=printTotals)
+        srv.put('data/control.txt',callback=printTotals)
         end = time.time()
         transferTime = end-start
         print transferTime
@@ -45,7 +55,8 @@ def openFile():
     _E1.delete(0, END)
     _E1.insert(0, _filePath)
 
-def fileIsValid():
+def fileIsValid(abc):
+    return True
     pass
 
 def upload():
