@@ -2,6 +2,8 @@ import pysftp
 import time
 from Tkinter import *
 import tkFileDialog
+import src.About
+import src.Preferences
 
 def createControlFile(filePath):
     control = open('data/control.txt', 'w')
@@ -119,13 +121,14 @@ def printTotals(transferred, toBeTransferred):
 def hello():
     pass
 
-def preferences():
-    prefWind = Tk()
-    prefWind.grab_set()  # when you show the popup
-    # do stuff ...
-    prefWind.grab_release()  # to return to normal
-    pass
+def readPreference():
 
+    pass
+def preferencesDialog():
+    src.Preferences(_root)
+    readPreference()
+def about():
+    src.About(_root)
 def createMenu():
     global _root
     menubar = Menu(_root)
@@ -133,7 +136,7 @@ def createMenu():
     # create a pulldown menu, and add it to the menu bar
     filemenu = Menu(menubar, tearoff=0)
     # filemenu.add_command(label="Open", command=hello)
-    filemenu.add_command(label="Preferences", command=preferences)
+    filemenu.add_command(label="Preferences", command=preferencesDialog)
     filemenu.add_separator()
     filemenu.add_command(label="Exit", command=_root.quit)
     menubar.add_cascade(label="File", menu=filemenu)
@@ -147,7 +150,7 @@ def createMenu():
 
     helpmenu = Menu(menubar, tearoff=0)
     helpmenu.add_command(label="Read Manual", command=hello)
-    helpmenu.add_command(label="About", command=hello)
+    helpmenu.add_command(label="About", command=about)
     menubar.add_cascade(label="Help", menu=helpmenu)
 
     # display the menu
@@ -204,6 +207,7 @@ def init(master):
     guiInit(master)
     _filePath=''
 if __name__ == "__main__":
+    global _root
     _root = Tk()
     init(_root)
     _root.mainloop()

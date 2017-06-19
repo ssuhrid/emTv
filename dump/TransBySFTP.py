@@ -22,11 +22,11 @@ except Exception as exp:
 
 try:
     srv = pysftp.Connection('raspberrypi3', username='pi', password='raspberry',cnopts=cnopts,port=22)
-    # srv.timeout(1)
+    # src.timeout(1)
     srv.chdir('ssuhrid/lan/data')
 
     # Get the directory and file listing
-    # data = srv.listdir()
+    # data = src.listdir()
     # # Prints out the directories and files, line by line
     # for i in data:
     #     print i
