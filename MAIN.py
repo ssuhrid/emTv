@@ -10,20 +10,28 @@ def createControlFile(filePath):
     if filePath == 'STOP':
         control.write('s')
     else:
-        if '.mkv' in filePath:
+        if '.mkv' in filePath or '.avi' in filePath \
+                or '.mov' in filePath or '.mp4' in filePath :
             control.write('v')
-        if '.ppt' in filePath:
+        elif '.ppt' in filePath:
             control.write('p')
+        elif '.png' in filePath or '.jpg' in filePath\
+                or '.jpeg' in filePath or '.bmp' in filePath :
+            control.write('i')
+        else:
+            control.close()
+            return False
         f1=0
         for i in range(0,len(filePath)):
             c=filePath[len(filePath)-i-1]
             if c=='/':
                 f1=len(filePath)-1-i
-                break
+            break
         fileName=filePath[f1+1:len(filePath)]
         control.write('\n')
         control.write(fileName)
     control.close()
+    return True
 def fileIsValid(abc):
     return True
     pass
@@ -32,15 +40,18 @@ def transferFile(host,user,passwd,file):
 
     try:
         print 'start'
-        createControlFile(file)
+        if not createControlFile(file):
+            printMsg('File Not Valid')
+            raise Exception('File Not Valid')
         cnopts = pysftp.CnOpts()
         cnopts.hostkeys = None  # disable host key checking.
         cnopts.compression = True
 
         _processRun = True
-        _srv = pysftp.Connection('192.168.137.2', username=user, password=passwd,cnopts=cnopts,port=22)
-        # srv.timeout(1)
+        _srv = pysftp.Connection('emTvUPCL001', username=user, password=passwd,cnopts=cnopts,port=22)
+        # _srv.timeout(1)
 
+        # print _srv
         _srv.chdir('emTv/pi/buffer')
 
         start = time.time()
@@ -55,9 +66,18 @@ def transferFile(host,user,passwd,file):
         _processRun = False
 
     except Exception as exp:
-        print(type(exp))    # the exception instance
+        string = str(type(exp))    # the exception instance
+        print string
+        if string == '<class \'pysftp.exceptions.ConnectionException\'>':
+            printMsg('Unable to establish connection')
+        elif string == '<class \'paramiko.ssh_exception.SSHException\'>':
+            printMsg('Server connection dropped')
         # print(exp.args)     # arguments stored in .args
         print(exp)          # __str__ allows args to be printed directly,
+        # pass
+
+def printMsg(x):
+    print x
 
 def openFile():
     global _filePath,_E1
@@ -65,7 +85,9 @@ def openFile():
     _E1.delete(0, END)
     _E1.insert(0, _filePath)
 def closetv():
-    global _statusBar
+    global _statusBar, _processRun,_srv
+    _processRun = False
+    _srv.close()
     _statusBar.config(text="System Busy", bg="#cc0605", width=70)  # Status Red
     _root.update()
     if fileIsValid(_filePath):
@@ -93,8 +115,48 @@ def printTotals(transferred, toBeTransferred):
     percent = '%0.2f' % (percent/100),'%'
     _L2['text']=percent
     _root.update()
+
+def hello():
+    pass
+
+def preferences():
+    prefWind = Tk()
+    prefWind.grab_set()  # when you show the popup
+    # do stuff ...
+    prefWind.grab_release()  # to return to normal
+    pass
+
+def createMenu():
+    global _root
+    menubar = Menu(_root)
+
+    # create a pulldown menu, and add it to the menu bar
+    filemenu = Menu(menubar, tearoff=0)
+    # filemenu.add_command(label="Open", command=hello)
+    filemenu.add_command(label="Preferences", command=preferences)
+    filemenu.add_separator()
+    filemenu.add_command(label="Exit", command=_root.quit)
+    menubar.add_cascade(label="File", menu=filemenu)
+
+    # create more pulldown menus
+    # editmenu = Menu(menubar, tearoff=0)
+    # editmenu.add_command(label="", command=hello)
+    # editmenu.add_command(label="Copy", command=hello)
+    # editmenu.add_command(label="Paste", command=hello)
+    # menubar.add_cascade(label="Edit", menu=editmenu)
+
+    helpmenu = Menu(menubar, tearoff=0)
+    helpmenu.add_command(label="Read Manual", command=hello)
+    helpmenu.add_command(label="About", command=hello)
+    menubar.add_cascade(label="Help", menu=helpmenu)
+
+    # display the menu
+    _root.config(menu=menubar)
+
+
 def guiInit(master):
     global _E1,_L2,_statusBar
+    createMenu()
     row=0
     f0 = Frame(master)
     L1 = Label(f0, text="Input File:")
