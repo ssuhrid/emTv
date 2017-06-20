@@ -6,7 +6,7 @@ class Preferences(Toplevel):
 
         Toplevel.__init__(self, parent)
         self.transient(parent)
-
+        # self.checkCheckbox()
         if title:
             self.title(title)
 

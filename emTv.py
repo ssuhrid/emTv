@@ -2,8 +2,12 @@ import pysftp
 import time
 from Tkinter import *
 import tkFileDialog
-import src.About
-import src.Preferences
+from src.About import *
+from src.Preferences import *
+import _cffi_backend
+
+import logging
+logging.basicConfig()
 
 def createControlFile(filePath):
     control = open('data/control.txt', 'w')
@@ -13,7 +17,8 @@ def createControlFile(filePath):
         control.write('s')
     else:
         if '.mkv' in filePath or '.avi' in filePath \
-                or '.mov' in filePath or '.mp4' in filePath :
+                or '.mov' in filePath or '.mp4' in filePath\
+                or '.mpg' in filePath or '.mpeg' in  filePath:
             control.write('v')
         elif '.ppt' in filePath:
             control.write('p')
@@ -28,7 +33,7 @@ def createControlFile(filePath):
             c=filePath[len(filePath)-i-1]
             if c=='/':
                 f1=len(filePath)-1-i
-            break
+                break
         fileName=filePath[f1+1:len(filePath)]
         control.write('\n')
         control.write(fileName)
@@ -40,17 +45,19 @@ def fileIsValid(abc):
 def transferFile(host,user,passwd,file):
     global _srv, _processRun
 
+    cnopts = pysftp.CnOpts()
+    # myhost = cnopts.get_hostkey('192.168.1.4')
+    cnopts.hostkeys = None  # disable host key checking.
+    # cnopts.compression = True
+
     try:
         print 'start'
         if not createControlFile(file):
             printMsg('File Not Valid')
             raise Exception('File Not Valid')
-        cnopts = pysftp.CnOpts()
-        cnopts.hostkeys = None  # disable host key checking.
-        cnopts.compression = True
 
         _processRun = True
-        _srv = pysftp.Connection('emTvUPCL001', username=user, password=passwd,cnopts=cnopts,port=22)
+        _srv = pysftp.Connection('emTvUPCL002', username=user, password=passwd,cnopts=cnopts,port=22)
         # _srv.timeout(1)
 
         # print _srv
@@ -125,10 +132,10 @@ def readPreference():
 
     pass
 def preferencesDialog():
-    src.Preferences(_root)
+    Preferences(_root)
     readPreference()
 def about():
-    src.About(_root)
+    About(_root)
 def createMenu():
     global _root
     menubar = Menu(_root)
