@@ -5,8 +5,9 @@ import tkFileDialog
 from src.About import *
 from src.Preferences import *
 import _cffi_backend
-
+from PIL import ImageTk, Image
 import logging
+import webbrowser
 logging.basicConfig()
 
 def createControlFile(filePath):
@@ -43,17 +44,19 @@ def fileIsValid(abc):
     return True
     pass
 def transferFile(host,user,passwd,file):
-    global _srv, _processRun
+    global _srv, _processRun,_L2
 
     cnopts = pysftp.CnOpts()
     # myhost = cnopts.get_hostkey('192.168.1.4')
     cnopts.hostkeys = None  # disable host key checking.
     # cnopts.compression = True
 
+    _L2['text'] = 'Progress: 00.00%'
+    _root.update()
+
     try:
         print 'start'
         if not createControlFile(file):
-            printMsg('File Not Valid')
             raise Exception('File Not Valid')
 
         _processRun = True
@@ -76,17 +79,24 @@ def transferFile(host,user,passwd,file):
 
     except Exception as exp:
         string = str(type(exp))    # the exception instance
-        print string
+        # print string
         if string == '<class \'pysftp.exceptions.ConnectionException\'>':
             printMsg('Unable to establish connection')
         elif string == '<class \'paramiko.ssh_exception.SSHException\'>':
             printMsg('Server connection dropped')
+        elif exp == 'File Not Valid':
+            printMsg('File Not Valid')
         # print(exp.args)     # arguments stored in .args
-        print(exp)          # __str__ allows args to be printed directly,
+        else:
+            printMsg(exp)          # __str__ allows args to be printed directly,
         # pass
 
-def printMsg(x):
-    print x
+
+def printMsg(msg):
+    global _text
+    _text.insert(END, msg)
+    _text.insert(END, '\n')
+    _text.see(END)
 
 def openFile():
     global _filePath,_E1
@@ -96,32 +106,37 @@ def openFile():
 def closetv():
     global _statusBar, _processRun,_srv
     _processRun = False
-    _srv.close()
-    _statusBar.config(text="System Busy", bg="#cc0605", width=70)  # Status Red
-    _root.update()
-    if fileIsValid(_filePath):
-        transferFile('raspberrypi3', 'pi', 'raspberry', 'STOP')
-    _statusBar.config(text="System Ready", bg="#308446", width=70)  # Status Red
-    _root.update()
+    if _processRun == True:
+        _srv.close()
+        _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
+        _root.update()
+        if fileIsValid(_filePath):
+            transferFile('raspberrypi3', 'pi', 'raspberry', 'STOP')
+        _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
+        _root.update()
+    else:
+        printMsg('Process not running.')
 def upload():
     global _filePath,_statusBar
-    _statusBar.config(text="System Busy", bg="#cc0605", width=70)  # Status Red
+    _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
     _root.update()
     if fileIsValid(_filePath):
         transferFile('raspberrypi3','pi','raspberry',_filePath)
-    _statusBar.config(text="System Ready", bg="#308446", width=70)  # Status Red
+    _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
     _root.update()
 def stop():
     global _processRun
     _processRun = False
     pass
+def openWebsite(event):
+    webbrowser.open_new(r"http://electromed.co.in")
 
 def printTotals(transferred, toBeTransferred):
     global _L2, _processRun,_srv
     if _processRun == False:
         _srv.close();
     percent = float(transferred)/toBeTransferred*10000
-    percent = '%0.2f' % (percent/100),'%'
+    percent = 'Progress: %0.2f' % (percent/100),'%'
     _L2['text']=percent
     _root.update()
 
@@ -165,12 +180,12 @@ def createMenu():
 
 
 def guiInit(master):
-    global _E1,_L2,_statusBar
+    global _E1,_L2,_statusBar,_text
     createMenu()
     row=0
     f0 = Frame(master)
     L1 = Label(f0, text="Input File:")
-    L1.grid(row=0, column=1, padx=20, pady=40)
+    L1.grid(row=0, column=1, padx=20, pady=30)
     _E1 = Entry(f0, bd=5, width=40)
     _E1.grid(row=0, column=2, sticky=E + W, columnspan=3, padx=0, pady=0)
     # _E1.config(state=DISABLED)
@@ -179,35 +194,46 @@ def guiInit(master):
     f0.grid(row=0)
     row+=1
 
-    _statusBar = Label(f0, text="System Ready", bg="#308446", width=70, pady=5, fg="#ffffff")  # Status Green
+    _statusBar = Label(f0, text="System Ready", bg="#308446", width=75, pady=1, fg="#ffffff")  # Status Green
     _statusBar.grid(row=1, column=0, columnspan=7, pady=0)
 
     f1 = Frame(master)
-    f1.grid(row=row, padx=0, pady=30,sticky=W)
-    lt1 = Label(f1, text="",padx=15)
+    f1.grid(row=row, padx=0, pady=0,sticky=W)
+    lt1 = Label(f1, text="",padx=5)
     lt1.grid(row=0, column=0)
     uploadButton = Button(f1, text="Upload", command=upload, width=10)
-    uploadButton.grid(row=0, column=1, padx=50)
-    lt2 = Label(f1, text="",padx=25)
-    lt2.grid(row=0, column=2)
-    labelRead = Label(f1, text="Uploading..")
-    labelRead.grid(row=0, column=3)
-    _L2 = Label(f1, text="0.00%")
-    _L2.grid(row=0, column=4, padx=15, pady=0)
-    row+=1
+    uploadButton.grid(row=0, column=1, padx=15,pady=20)
+    _L2 = Label(f1, text="Progress: 00.00%")
+    _L2.grid(row=0, column=2, padx=15, pady=0)
 
-    f2 = Frame(master)
-    f2.grid(row=row, padx=0, pady=30,sticky=W)
-    lt1 = Label(f2, text="",padx=15)
-    lt1.grid(row=0, column=0)
-    closeButton = Button(f2, text="Close TV", command=closetv, width=10)
-    closeButton.grid(row=0, column=1, padx=50)
-    lt2 = Label(f2, text="",padx=25)
-    lt2.grid(row=0, column=2)
-    stopButton = Button(f2, text="Stop", command=stop, width=10)
-    stopButton.grid(row=0, column=2, padx=50)
-    # _L2 = Label(f2, text="0.00%")
-    # _L2.grid(row=0, column=4, padx=15, pady=0)
+    lt1 = Label(f1, text="",padx=15)
+    lt1.grid(row=1, column=0)
+    closeButton = Button(f1, text="Close TV", command=closetv, width=10)
+    closeButton.grid(row=1, column=1, padx=10)
+    lt2 = Label(f1, text="",padx=25)
+    lt2.grid(row=1, column=2)
+    stopButton = Button(f1, text="Stop", command=stop, width=10)
+    stopButton.grid(row=1, column=2, padx=20)
+    Label(f1, text="").grid(row=2, column=4, padx=15, pady=0)
+
+    # Textbox
+    fText = Frame(f1)
+    fText.grid(row=0, rowspan=3, column=5, padx=0)
+    textY = Scrollbar(fText)
+    _text = Text(fText, width=20, height=5)
+    _text.config(yscrollcommand=textY.set)
+    textY.config(command=_text.yview)
+    _text.grid(row=0, column=0)
+    textY.grid(row=0, column=1, sticky=N + S)
+    row += 1
+
+    fFooter = Frame(master)
+    fFooter.grid(row=row, padx=0)
+    img = ImageTk.PhotoImage(Image.open(r"data\emFooter.jpg"))
+    footer = Label(fFooter,image=img,borderwidth=0, highlightthickness=0,cursor="hand2")
+    footer.bind("<Button-1>", openWebsite)
+    footer.image = img  # keep a reference!
+    footer.grid(row=0)
 
 def init(master):
     global _filePath
@@ -216,5 +242,6 @@ def init(master):
 if __name__ == "__main__":
     global _root
     _root = Tk()
+    _root.title('emTv  Assistant')
     init(_root)
     _root.mainloop()
