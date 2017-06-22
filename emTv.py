@@ -60,7 +60,7 @@ def transferFile(host,user,passwd,file):
             raise Exception('File Not Valid')
 
         _processRun = True
-        _srv = pysftp.Connection('emTvUPCL002', username=user, password=passwd,cnopts=cnopts,port=22)
+        _srv = pysftp.Connection('emTvUPCL001', username=user, password=passwd,cnopts=cnopts,port=22)
         # _srv.timeout(1)
 
         # print _srv
@@ -111,7 +111,7 @@ def closetv():
         _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
         _root.update()
         if fileIsValid(_filePath):
-            transferFile('raspberrypi3', 'pi', 'raspberry', 'STOP')
+            transferFile('emTvUPCL001', 'pi', 'raspberry', 'STOP')
         _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
         _root.update()
     else:
@@ -121,7 +121,7 @@ def upload():
     _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
     _root.update()
     if fileIsValid(_filePath):
-        transferFile('raspberrypi3','pi','raspberry',_filePath)
+        transferFile('emTvUPCL001','pi','raspberry',_filePath)
     _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
     _root.update()
 def stop():
@@ -158,17 +158,10 @@ def createMenu():
     # create a pulldown menu, and add it to the menu bar
     filemenu = Menu(menubar, tearoff=0)
     # filemenu.add_command(label="Open", command=hello)
-    filemenu.add_command(label="Preferences", command=preferencesDialog)
-    filemenu.add_separator()
+    # filemenu.add_command(label="Preferences", command=preferencesDialog)
+    # filemenu.add_separator()
     filemenu.add_command(label="Exit", command=_root.quit)
     menubar.add_cascade(label="File", menu=filemenu)
-
-    # create more pulldown menus
-    # editmenu = Menu(menubar, tearoff=0)
-    # editmenu.add_command(label="", command=hello)
-    # editmenu.add_command(label="Copy", command=hello)
-    # editmenu.add_command(label="Paste", command=hello)
-    # menubar.add_cascade(label="Edit", menu=editmenu)
 
     helpmenu = Menu(menubar, tearoff=0)
     helpmenu.add_command(label="Read Manual", command=hello)

@@ -41,6 +41,13 @@ class About(Toplevel):
         # create dialog body.  return widget that should have
         # initial focus.  this method should be overridden
 
+
+        # 'Build Information' \
+        # 'Compiled for: Udupi Power Corporation Limited, Karnataka' \
+        # 'Build data: 18 June 2017' \
+        # 'System Details' \
+        # 'Operating System: Windows 8 (build 9200), 64-bit edition
+        # '
         pass
 
     def buttonbox(self):
