@@ -5,7 +5,7 @@ import bcrypt
 import _cffi_backend
 
 # Mydata_files = [('data', ['data\\control.txt']),('src', ['src\\About.py','src\\Preferences.py'])]
-Mydata_files = [('data', ['data\\control.txt'])]
+Mydata_files = [('data', ['data\\control.txt','data\\emFooter.jpg'])]
 setup(windows=['emTv.py'],
       data_files = Mydata_files,
       options = {"py2exe": {"unbuffered": True,

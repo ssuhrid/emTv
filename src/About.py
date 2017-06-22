@@ -1,6 +1,10 @@
 from Tkinter import *
+import webbrowser
 
 class About(Toplevel):
+
+    def openWebsite(self,event):
+        webbrowser.open_new(r"http://electromed.co.in")
 
     def __init__(self, parent, title = None):
 
@@ -41,13 +45,17 @@ class About(Toplevel):
         # create dialog body.  return widget that should have
         # initial focus.  this method should be overridden
 
-
-        # 'Build Information' \
-        # 'Compiled for: Udupi Power Corporation Limited, Karnataka' \
-        # 'Build data: 18 June 2017' \
-        # 'System Details' \
-        # 'Operating System: Windows 8 (build 9200), 64-bit edition
-        # '
+        w =Label(master,text='Build Information: \n\nCompiled for:'
+                             '\nUdupi Power Corporation Limited'
+                           '\nKarnataka'
+                          '\n\nBuild date: 18 June 2017 '
+                          '\n\nWritten and distributed by:'
+                          '\n\nELECTRO-MED Lucknow'
+                          ,anchor=W,justify=LEFT)
+        w.pack(side=TOP)
+        link = Label(master,text='www.electromed.co.in',anchor =W,justify=LEFT, cursor="hand2",fg="blue")
+        link.bind("<Button-1>",self.openWebsite)
+        link.pack(side=TOP,fill=X)
         pass
 
     def buttonbox(self):
@@ -98,3 +106,8 @@ class About(Toplevel):
     def apply(self):
 
         pass # override
+
+if __name__=="__main__":
+    root=Tk()
+    About(root)
+    root.mainloop()

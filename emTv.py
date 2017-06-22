@@ -10,6 +10,16 @@ import logging
 import webbrowser
 logging.basicConfig()
 
+def getFileNameFromFilepath(filePath):
+    f1 = 0
+    for i in range(0, len(filePath)):
+        c = filePath[len(filePath) - i - 1]
+        if c == '/':
+            f1 = len(filePath) - 1 - i
+            break
+    fileName = filePath[f1 + 1:len(filePath)]
+    return fileName
+
 def createControlFile(filePath):
     control = open('data/control.txt', 'w')
     control.write('$')
@@ -18,8 +28,7 @@ def createControlFile(filePath):
         control.write('s')
     else:
         if '.mkv' in filePath or '.avi' in filePath \
-                or '.mov' in filePath or '.mp4' in filePath\
-                or '.mpg' in filePath or '.mpeg' in  filePath:
+                or '.mov' in filePath or '.mp4' in filePath:
             control.write('v')
         elif '.ppt' in filePath:
             control.write('p')
@@ -29,13 +38,8 @@ def createControlFile(filePath):
         else:
             control.close()
             return False
-        f1=0
-        for i in range(0,len(filePath)):
-            c=filePath[len(filePath)-i-1]
-            if c=='/':
-                f1=len(filePath)-1-i
-                break
-        fileName=filePath[f1+1:len(filePath)]
+
+        fileName = getFileNameFromFilepath(filePath)
         control.write('\n')
         control.write(fileName)
     control.close()
@@ -44,12 +48,11 @@ def fileIsValid(abc):
     return True
     pass
 def transferFile(host,user,passwd,file):
-    global _srv, _processRun,_L2
+    global _srv, _processRun,_L2,_host
 
     cnopts = pysftp.CnOpts()
-    # myhost = cnopts.get_hostkey('192.168.1.4')
     cnopts.hostkeys = None  # disable host key checking.
-    # cnopts.compression = True
+    cnopts.compression = True
 
     _L2['text'] = 'Progress: 00.00%'
     _root.update()
@@ -60,7 +63,7 @@ def transferFile(host,user,passwd,file):
             raise Exception('File Not Valid')
 
         _processRun = True
-        _srv = pysftp.Connection('emTvUPCL001', username=user, password=passwd,cnopts=cnopts,port=22)
+        _srv = pysftp.Connection(_host, username=user, password=passwd,cnopts=cnopts,port=22)
         # _srv.timeout(1)
 
         # print _srv
@@ -73,6 +76,7 @@ def transferFile(host,user,passwd,file):
         end = time.time()
         transferTime = end-start
         print transferTime
+        printMsg('File upload successful.')
         # Closes the connection
         _srv.close()
         _processRun = False
@@ -104,30 +108,33 @@ def openFile():
     _E1.delete(0, END)
     _E1.insert(0, _filePath)
 def closetv():
-    global _statusBar, _processRun,_srv
+    global _statusBar, _processRun,_srv,_host
     _processRun = False
-    if _processRun == True:
-        _srv.close()
-        _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
-        _root.update()
-        if fileIsValid(_filePath):
-            transferFile('emTvUPCL001', 'pi', 'raspberry', 'STOP')
-        _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
-        _root.update()
-    else:
-        printMsg('Process not running.')
-def upload():
-    global _filePath,_statusBar
     _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
     _root.update()
     if fileIsValid(_filePath):
-        transferFile('emTvUPCL001','pi','raspberry',_filePath)
+        printMsg('Closing Tv ...')
+        transferFile(_host, 'pi', 'raspberry', 'STOP')
+    _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
+    _root.update()
+def upload():
+    global _filePath,_statusBar,_host
+    _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
+    _root.update()
+    if fileIsValid(_filePath):
+        fileName = getFileNameFromFilepath(_filePath)
+        if not fileName=='':
+            printMsg('Uploading file: %s' % (fileName))
+            transferFile(_host,'pi','raspberry',_filePath)
     _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
     _root.update()
 def stop():
     global _processRun
-    _processRun = False
-    pass
+    if _processRun == True:
+        _processRun = False
+    else:
+        printMsg('Process not running.')
+
 def openWebsite(event):
     webbrowser.open_new(r"http://electromed.co.in")
 
@@ -136,7 +143,7 @@ def printTotals(transferred, toBeTransferred):
     if _processRun == False:
         _srv.close();
     percent = float(transferred)/toBeTransferred*10000
-    percent = 'Progress: %0.2f' % (percent/100),'%'
+    percent = 'Progress: %0.2f%s' % (percent/100,'%')
     _L2['text']=percent
     _root.update()
 
@@ -233,7 +240,9 @@ def init(master):
     guiInit(master)
     _filePath=''
 if __name__ == "__main__":
+    global _host
     global _root
+    _host = 'emTvUPCL001'
     _root = Tk()
     _root.title('emTv  Assistant')
     init(_root)
