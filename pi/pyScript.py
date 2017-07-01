@@ -4,7 +4,7 @@ import time
 import RPi.GPIO as GPIO
 
 def reset():
-    GPIO.output(18,0)
+    GPIO.output(23,0)
     os.system('sudo killall omxplayer.bin')
     os.system('sudo killall pqiv')
     # os.system('sudo killall python')
@@ -26,13 +26,13 @@ def reset():
     control.write('\n')
     control.close()
 
-    GPIO.output(18,1)
+    GPIO.output(23,1)
 
-def blink():
-    GPIO.output(18,0)
-    time.sleep(0.1)
-    GPIO.output(18,1)
-    time.sleep(0.1)
+def blink(sec):
+    GPIO.output(23,0)
+    time.sleep(sec)
+    GPIO.output(23,1)
+    time.sleep(sec)
 
 def deleteAllBuffer():
     # Delete all files in buffer
@@ -82,8 +82,8 @@ def initiate():
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-# GPIO.setup(23,GPIO.OUT)
-# GPIO.output(23,1)
+GPIO.setup(23,GPIO.OUT,initial=0)
+GPIO.output(23,1)
 initiate()
 while True:
     try:
@@ -91,13 +91,13 @@ while True:
 
         input_state = GPIO.input(18)
         if not input_state:
-            pass #reset()
+            reset()
 
         if os.path.isfile('buffer/control.txt') :
 
             #Blink 10 times
-            # for i in range(0,10):
-            #     blink()
+            for i in range(0,10):
+                blink(0.1)
 
             # Read control file
             control = open('buffer/control.txt', 'r')
@@ -137,13 +137,21 @@ while True:
                 if c2=='i':
                     pqivx = Popen(['pqiv','-i','--fullscreen','current/%s'%(dataFile)])
                 if c2=='u':
+                    # Blink 10 times
+                    for i in range(0, 5):
+                        blink(0.5)
                     Popen('python updateScript.py',shell=True)
                     # Popen(['python','updateScript.py'])
 
                 # Delete all files in buffer
                 deleteAllBuffer()
 
+                # Blink 10 times
+                for i in range(0, 10):
+                    blink(0.1)
+
     except Exception as exp:
-        # GPIO.output(23, 0)
+
+        # blink(1)
 
         time.sleep(1)
