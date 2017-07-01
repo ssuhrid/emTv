@@ -35,6 +35,8 @@ def createControlFile(filePath):
         elif '.png' in filePath or '.jpg' in filePath\
                 or '.jpeg' in filePath or '.bmp' in filePath :
             control.write('i')
+        elif '.em' in filePath:
+            control.write('u')
         else:
             control.close()
             return False
@@ -63,7 +65,7 @@ def transferFile(host,user,passwd,file):
             raise Exception('File Not Valid')
 
         _processRun = True
-        _srv = pysftp.Connection(_host, username=user, password=passwd,cnopts=cnopts,port=22)
+        _srv = pysftp.Connection(host, username=user, password=passwd,cnopts=cnopts,port=22)
         # _srv.timeout(1)
 
         # print _srv
@@ -108,24 +110,24 @@ def openFile():
     _E1.delete(0, END)
     _E1.insert(0, _filePath)
 def closetv():
-    global _statusBar, _processRun,_srv,_host
+    global _statusBar, _processRun,_srv,_host,_username,_password
     _processRun = False
     _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
     _root.update()
     if fileIsValid(_filePath):
         printMsg('Closing Tv ...')
-        transferFile(_host, 'pi', 'raspberry', 'STOP')
+        transferFile(_host, _username, _password, 'STOP')
     _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
     _root.update()
 def upload():
-    global _filePath,_statusBar,_host
+    global _filePath,_statusBar,_host,_username,_password
     _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
     _root.update()
     if fileIsValid(_filePath):
         fileName = getFileNameFromFilepath(_filePath)
         if not fileName=='':
             printMsg('Uploading file: %s' % (fileName))
-            transferFile(_host,'pi','raspberry',_filePath)
+            transferFile(_host,_username, _password ,_filePath)
     _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
     _root.update()
 def stop():
@@ -240,9 +242,12 @@ def init(master):
     guiInit(master)
     _filePath=''
 if __name__ == "__main__":
-    global _host
-    global _root
+    global _host, _root, _username, _password
     _host = 'emTvUPCL001'
+    # _username='emtvupcl001'
+    # _password='eM$7805!'
+    _username='pi'
+    _password='raspberry'
     _root = Tk()
     _root.title('emTv  Assistant')
     init(_root)
