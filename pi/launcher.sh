@@ -3,6 +3,6 @@
 # navigate to home directory, then to this directory, then execute python script, then back home
 
 cd /
-cd home/pi/emTv/pi
+cd /home/pi/emTv/pi
 sudo python pyScript.py
 cd /

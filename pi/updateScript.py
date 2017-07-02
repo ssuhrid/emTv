@@ -20,9 +20,6 @@ if os.path.isfile('current/pyScript.py'):
     control.write('s')
     control.close()
 
-    # files = os.listdir('buffer')
-    # for file in files:
-    #     if not file == '':
-    #         os.system('rm "buffer/%s"' % file)
+    os.system('rm -rf buffer/*.*')
 
     Popen('python pyScript.py',shell=True)

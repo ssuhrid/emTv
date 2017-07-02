@@ -3,6 +3,13 @@ import os
 import time
 import RPi.GPIO as GPIO
 
+def reset():
+    GPIO.output(23,0)
+    time.sleep(2)
+    for i in range(0,3):
+        blink(2)
+    Popen('python resetScript.py',shell=True)
+
 def blink(sec):
     GPIO.output(23,0)
     time.sleep(sec)
@@ -16,10 +23,24 @@ def deleteAllBuffer():
         if not file == '':
             os.system('rm "buffer/%s"' % file)
 
+def deleteAllCurrent():
+    # Delete all files in buffer
+    files = os.listdir('buffer')
+    for file in files:
+        if not file == '':
+            os.system('rm "current/%s"' % file)
+
+
 def initiate():
+
+    input_state = GPIO.input(18)
 
     for i in range(0,5):
         blink(0.5)
+
+    if not input_state:
+        GPIO.cleanup()
+        reset()
 
     try:
         control = open('current/control.txt', 'r')
@@ -46,20 +67,20 @@ def initiate():
     if c2 == 'p':
         pass
 
+GPIO.cleanup()
 GPIO.setmode(GPIO.BCM)
-# GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(23,GPIO.OUT,initial=1)
+GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(23,GPIO.OUT,initial=0)
 GPIO.output(23,1)
 initiate()
-prev =0
 while True:
-
-    if time.time()-prev > 5:
-        blink(0.1)
-        prev=time.time()
-
     try:
         # Read states of inputs
+
+        input_state = GPIO.input(18)
+        if not input_state:
+            GPIO.cleanup()
+            reset()
 
         if os.path.isfile('buffer/control.txt') :
 

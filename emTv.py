@@ -35,7 +35,7 @@ def createControlFile(filePath):
         elif '.png' in filePath or '.jpg' in filePath\
                 or '.jpeg' in filePath or '.bmp' in filePath :
             control.write('i')
-        elif '.em' in filePath:
+        elif '.emc' in filePath:
             control.write('u')
         else:
             control.close()
