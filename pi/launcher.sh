@@ -4,5 +4,5 @@
 
 cd /
 cd /home/pi/emTv/pi
-sudo python pyScript.py
+python pyScript.py
 cd /

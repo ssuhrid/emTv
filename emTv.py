@@ -8,8 +8,10 @@ import _cffi_backend
 from PIL import ImageTk, Image
 import logging
 import webbrowser
-logging.basicConfig()
+import subprocess
+import ttk
 
+logging.basicConfig()
 def getFileNameFromFilepath(filePath):
     f1 = 0
     for i in range(0, len(filePath)):
@@ -50,14 +52,16 @@ def fileIsValid(abc):
     return True
     pass
 def transferFile(host,user,passwd,file):
-    global _srv, _processRun,_L2,_host
+    global _srv, _processRun,_L2,_host,_progressBar
 
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None  # disable host key checking.
     cnopts.compression = True
 
-    _L2['text'] = 'Progress: 00.00%'
+    _L2['text'] = '00.00%'
+    _progressBar["value"] = 0
     _root.update()
+    print 'check'
 
     try:
         print 'start'
@@ -136,17 +140,35 @@ def stop():
         _processRun = False
     else:
         printMsg('Process not running.')
+def checkConn():
+    global _statusBar,_host
+    _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
+    _root.update()
+    p1 = subprocess.Popen(['ping', _host], stdout=subprocess.PIPE)
+    # Run the command
+    output = p1.communicate()[0]
+    if 'Lost = 0 (0% loss)' in output:
+        printMsg('Tv Connected')
+    else:
+        printMsg('Connection Error')
+    _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
+    _root.update()
+
 
 def openWebsite(event):
     webbrowser.open_new(r"http://electromed.co.in")
 
 def printTotals(transferred, toBeTransferred):
-    global _L2, _processRun,_srv
+    global _L2, _processRun,_srv,_progressBar
     if _processRun == False:
         _srv.close();
     percent = float(transferred)/toBeTransferred*10000
-    percent = 'Progress: %0.2f%s' % (percent/100,'%')
+    progress = int(percent/100)
+    percent = '%0.2f%s' % (percent/100,'%')
     _L2['text']=percent
+    # print int(percent)
+    _progressBar["value"] = progress
+    # self.frame.update()
     _root.update()
 
 def hello():
@@ -182,7 +204,7 @@ def createMenu():
 
 
 def guiInit(master):
-    global _E1,_L2,_statusBar,_text
+    global _E1,_L2,_statusBar,_text,_progressBar
     createMenu()
     row=0
     f0 = Frame(master)
@@ -199,14 +221,21 @@ def guiInit(master):
     _statusBar = Label(f0, text="System Ready", bg="#308446", width=75, pady=1, fg="#ffffff")  # Status Green
     _statusBar.grid(row=1, column=0, columnspan=7, pady=0)
 
+    Label(f0).grid(row=2, column=0, pady=0)
+    _progressBar = ttk.Progressbar(f0, orient=HORIZONTAL, mode='determinate',length=430)
+    # _progressBar.grid(row=3, column=0, columnspan=7,pady=0)
+    _progressBar["maximum"] = 100
+
     f1 = Frame(master)
     f1.grid(row=row, padx=0, pady=0,sticky=W)
     lt1 = Label(f1, text="",padx=5)
     lt1.grid(row=0, column=0)
     uploadButton = Button(f1, text="Upload", command=upload, width=10)
     uploadButton.grid(row=0, column=1, padx=15,pady=20)
-    _L2 = Label(f1, text="Progress: 00.00%")
-    _L2.grid(row=0, column=2, padx=15, pady=0)
+    checkButton = Button(f1, text="Check", command=checkConn, width=10)
+    checkButton.grid(row=0, column=2, padx=15,pady=0)
+    # _L2 = Label(f1, text="00.00%")
+    # _L2.grid(row=0, column=2, padx=15, pady=0)
 
     lt1 = Label(f1, text="",padx=15)
     lt1.grid(row=1, column=0)

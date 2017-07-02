@@ -41,8 +41,8 @@ def initiate():
         omxc = Popen(['omxplayer', '-b', '--no-osd', '--loop', 'current/%s' % (dataFile)])
         player = True
     if c2 == 'i':
-        omxc = Popen(['pqiv', '-i', '--fullscreen', 'current/%s' % (dataFile)])
-        # player = True
+        omxc = Popen(['sudo fbi -T 1 --autodown -noverbose -t 10 current/%s' % (dataFile)],shell=True)
+        player = True
     if c2 == 'p':
         pass
 
@@ -80,7 +80,7 @@ while True:
                 # Kill current process
                 try:
                     os.system('killall omxplayer.bin')
-                    os.system('killall pqiv')
+                    os.system('killall fbi')
                 except Exception as exp:
                     print exp
 
@@ -103,7 +103,8 @@ while True:
                 if c2=='p':
                     pass
                 if c2=='i':
-                    pqivx = Popen(['pqiv','-i','--fullscreen','current/%s'%(dataFile)])
+                    pqivx = Popen(['fbi -T 1 --autodown -noverbose -t 10 current/%s'%(dataFile)],shell=True)
+                    player = True
                 if c2=='u':
                     for i in range(0, 5):
                         blink(2)
