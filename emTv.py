@@ -58,7 +58,7 @@ def transferFile(host,user,passwd,file):
     cnopts.hostkeys = None  # disable host key checking.
     cnopts.compression = True
 
-    _L2['text'] = '00.00%'
+    _L2['text'] = 'Progress: 00.00%'
     _progressBar["value"] = 0
     _root.update()
     print 'check'
@@ -164,7 +164,7 @@ def printTotals(transferred, toBeTransferred):
         _srv.close();
     percent = float(transferred)/toBeTransferred*10000
     progress = int(percent/100)
-    percent = '%0.2f%s' % (percent/100,'%')
+    percent = 'Progress: %0.2f%s' % (percent/100,'%')
     _L2['text']=percent
     # print int(percent)
     _progressBar["value"] = progress
@@ -222,40 +222,43 @@ def guiInit(master):
     _statusBar.grid(row=1, column=0, columnspan=7, pady=0)
 
     Label(f0).grid(row=2, column=0, pady=0)
-    _progressBar = ttk.Progressbar(f0, orient=HORIZONTAL, mode='determinate',length=430)
-    # _progressBar.grid(row=3, column=0, columnspan=7,pady=0)
-    _progressBar["maximum"] = 100
 
     f1 = Frame(master)
+
+    _L2 = Label(f1, text="Progress: 00.00%")
+    _L2.grid(row=0, column=1, padx=0, pady=0)
+    _progressBar = ttk.Progressbar(f1, orient=HORIZONTAL, mode='determinate',length=332)
+    _progressBar.grid(row=0, column=2, columnspan=7,pady=0,sticky=W,padx=24)
+    _progressBar["maximum"] = 100
+    # Label(f0, text="").grid(row=3, column=10, padx=15, pady=0)
+
     f1.grid(row=row, padx=0, pady=0,sticky=W)
     lt1 = Label(f1, text="",padx=5)
-    lt1.grid(row=0, column=0)
+    lt1.grid(row=1, column=0)
     uploadButton = Button(f1, text="Upload", command=upload, width=10)
-    uploadButton.grid(row=0, column=1, padx=15,pady=20)
+    uploadButton.grid(row=1, column=1, padx=15,pady=20)
     checkButton = Button(f1, text="Check", command=checkConn, width=10)
-    checkButton.grid(row=0, column=2, padx=15,pady=0)
-    # _L2 = Label(f1, text="00.00%")
-    # _L2.grid(row=0, column=2, padx=15, pady=0)
+    checkButton.grid(row=1, column=2, padx=15,pady=0)
 
     lt1 = Label(f1, text="",padx=15)
-    lt1.grid(row=1, column=0)
+    lt1.grid(row=2, column=0)
     closeButton = Button(f1, text="Close TV", command=closetv, width=10)
-    closeButton.grid(row=1, column=1, padx=10)
+    closeButton.grid(row=2, column=1, padx=10)
     lt2 = Label(f1, text="",padx=25)
-    lt2.grid(row=1, column=2)
+    lt2.grid(row=2, column=2)
     stopButton = Button(f1, text="Stop", command=stop, width=10)
-    stopButton.grid(row=1, column=2, padx=20)
-    Label(f1, text="").grid(row=2, column=4, padx=15, pady=0)
+    stopButton.grid(row=2, column=2, padx=20)
+    Label(f1, text="").grid(row=3, column=4, padx=15, pady=0)
 
     # Textbox
     fText = Frame(f1)
-    fText.grid(row=0, rowspan=3, column=5, padx=0)
+    fText.grid(row=1, rowspan=3, column=5, padx=0)
     textY = Scrollbar(fText)
     _text = Text(fText, width=20, height=5)
     _text.config(yscrollcommand=textY.set)
     textY.config(command=_text.yview)
-    _text.grid(row=0, column=0)
-    textY.grid(row=0, column=1, sticky=N + S)
+    _text.grid(row=1, column=0)
+    textY.grid(row=1, column=1, sticky=N + S)
     row += 1
 
     fFooter = Frame(master)
