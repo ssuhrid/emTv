@@ -14,6 +14,8 @@ if os.path.isfile('current/pyScript.py'):
     os.system('sudo pkill -f pyScript.py')
     os.system('mv current/pyScript.py pyScript.py')
 
+    os.system('rm -rf current/*.*')
+
     control = open('current/control.txt','w')
     control.write('$')
     control.write('\n')

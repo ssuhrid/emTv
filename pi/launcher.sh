@@ -4,5 +4,5 @@
 
 cd /
 cd /home/pi/emTv/pi
-python pyScript.py
+python launch.py
 cd /

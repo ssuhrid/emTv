@@ -3,44 +3,36 @@ import os
 import time
 import RPi.GPIO as GPIO
 
-def reset():
-    GPIO.output(23,0)
-    time.sleep(2)
-    for i in range(0,3):
-        blink(2)
-    Popen('python resetScript.py',shell=True)
-
 def blink(sec):
     GPIO.output(23,0)
     time.sleep(sec)
     GPIO.output(23,1)
     time.sleep(sec)
+def run(c1,c2,dataFile):
 
-def deleteAllBuffer():
-    # Delete all files in buffer
-    files = os.listdir('buffer')
-    for file in files:
-        if not file == '':
-            os.system('rm "buffer/%s"' % file)
-
-def deleteAllCurrent():
-    # Delete all files in buffer
-    files = os.listdir('buffer')
-    for file in files:
-        if not file == '':
-            os.system('rm "current/%s"' % file)
-
-
+    if c2 == 'v':
+        omxc = Popen(['omxplayer', '-b', '--no-osd', '--loop', 'current/%s' % (dataFile)])
+        player = True
+    if c2 == 'i':
+        omxc = Popen(['sudo fbi -T 1 --autodown -noverbose -t 10 current/%s' % (dataFile)],shell=True)
+        player = True
+    if c2 == 'p':
+        pass
+    if c2 == 'z':
+        if os.file.ispath('current/%s'):
+            os.system('unzip -d current "current/%s' % (dataFile, dataFile))
+            os.system('rm current/%s')
+        pqivx = Popen(['sudo fbi -T 1 --autodown -noverbose -t 10 current/%s/*.jpg' % dataFile], shell=True)
+        player = True
+    if c2 == 'u':
+        for i in range(0, 5):
+            blink(2)
+        GPIO.cleanup()
+        Popen('python updateScript.py', shell=True)
 def initiate():
-
-    input_state = GPIO.input(18)
 
     for i in range(0,5):
         blink(0.5)
-
-    if not input_state:
-        GPIO.cleanup()
-        reset()
 
     try:
         control = open('current/control.txt', 'r')
@@ -49,7 +41,7 @@ def initiate():
         dataFile = control.readline()
         control.close()
     except Exception as exp:
-        control = open('current/control.txt', 'r')
+        control = open('current/control.txt', 'w')
         control.write('$')
         control.write('\n')
         control.write('s')
@@ -58,89 +50,72 @@ def initiate():
         control.close()
 
     # Start the appropriate process on current file
-    if c2 == 'v':
-        omxc = Popen(['omxplayer', '-b', '--no-osd', '--loop', 'current/%s' % (dataFile)])
-        player = True
-    if c2 == 'i':
-        omxc = Popen(['pqiv', '-i', '--fullscreen', 'current/%s' % (dataFile)])
-        # player = True
-    if c2 == 'p':
-        pass
+    run(c1,c2,dataFile)
 
-GPIO.cleanup()
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(23,GPIO.OUT,initial=0)
-GPIO.output(23,1)
-initiate()
-while True:
-    try:
-        # Read states of inputs
+if __name__ == "__main__":
+    GPIO.setmode(GPIO.BCM)
+    # GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(23,GPIO.OUT,initial=1)
+    GPIO.output(23,1)
+    initiate()
+    prev =0
+    while True:
 
-        input_state = GPIO.input(18)
-        if not input_state:
-            GPIO.cleanup()
-            reset()
+        if time.time()-prev > 5:
+            blink(0.1)
+            prev=time.time()
 
-        if os.path.isfile('buffer/control.txt') :
+        try:
+            # Read states of inputs
 
-            #Blink 10 times
-            for i in range(0,10):
-                blink(0.1)
+            if os.path.isfile('buffer/control.txt') :
 
-            # Read control file
-            control = open('buffer/control.txt', 'r')
-            c1 = control.readline()[0]
-            c2 = control.readline()[0]
-            dataFile = control.readline()
-            control.close()
-            print dataFile
-
-            if c1 == '$':
-
-                # Kill current process
-                try:
-                    os.system('killall omxplayer.bin')
-                    os.system('killall pqiv')
-                except Exception as exp:
-                    print exp
-
-                # Delete all current files
-                files = os.listdir('current')
-                for file in files:
-                    if not file == 'control.txt':
-                        if not file == '':
-                            os.system('rm -rf "current/%s"' %(file))
-
-                # Move data,control files to current
-                if not dataFile == '':
-                    os.system('mv "buffer/%s" "current/%s"' % (dataFile,dataFile))
-                os.system('mv buffer/control.txt current/control.txt')
-
-                # Start the appropriate process on current file
-                if c2=='v':
-                    omxc = Popen(['omxplayer', '-b', '--no-osd','--loop','current/%s'%(dataFile)])
-                    player = True
-                if c2=='p':
-                    pass
-                if c2=='i':
-                    pqivx = Popen(['pqiv','-i','--fullscreen','current/%s'%(dataFile)])
-                if c2=='u':
-                    for i in range(0, 5):
-                        blink(2)
-                    GPIO.cleanup()
-                    Popen('python updateScript.py',shell=True)
-                    # Popen(['python','updateScript.py'])
-
-                # Delete all files in buffer
-                deleteAllBuffer()
-
-                # Blink 10 times
-                for i in range(0, 10):
+                #Blink 10 times
+                for i in range(0,10):
                     blink(0.1)
 
-    except Exception as exp:
+                # Read control file
+                control = open('buffer/control.txt', 'r')
+                c1 = control.readline()[0]
+                c2 = control.readline()[0]
+                dataFile = control.readline()
+                control.close()
+                print dataFile
 
-        # blink(1)
+                if c1 == '$':
 
-        time.sleep(1)
+                    # Kill current process
+                    try:
+                        os.system('killall omxplayer.bin')
+                        os.system('killall fbi')
+                    except Exception as exp:
+                        print exp
+
+                    # Delete all current files
+                    files = os.listdir('current')
+                    for file in files:
+                        if not file == 'control.txt':
+                            if not file == '':
+                                os.system('rm -rf "current/%s"' %(file))
+
+                    # Move data,control files to current
+                    if not dataFile == '':
+                        os.system('mv "buffer/%s" "current/%s"' % (dataFile,dataFile))
+                    os.system('mv buffer/control.txt current/control.txt')
+
+                    # Start the appropriate process on current file
+                    run(c1,c2,dataFile)
+
+                    # Delete all files in buffer
+                    # deleteAllBuffer()
+                    os.system('rm -rf buffer/*.*')
+
+                    # Blink 10 times
+                    for i in range(0, 10):
+                        blink(0.1)
+
+        except Exception as exp:
+
+            # blink(1)
+
+            time.sleep(1)

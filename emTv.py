@@ -12,6 +12,12 @@ import subprocess
 import ttk
 
 logging.basicConfig()
+def init(master):
+    global _filePath
+    guiInit(master)
+    _filePath=''
+
+
 def getFileNameFromFilepath(filePath):
     f1 = 0
     for i in range(0, len(filePath)):
@@ -21,7 +27,6 @@ def getFileNameFromFilepath(filePath):
             break
     fileName = filePath[f1 + 1:len(filePath)]
     return fileName
-
 def createControlFile(filePath):
     control = open('data/control.txt', 'w')
     control.write('$')
@@ -29,16 +34,19 @@ def createControlFile(filePath):
     if filePath == 'STOP':
         control.write('s')
     else:
-        if '.mkv' in filePath or '.avi' in filePath \
-                or '.mov' in filePath or '.mp4' in filePath:
+        ext = filePath[-4:]
+        if '.mkv'==ext or '.avi'==ext \
+                or '.mov'==ext or '.mp4'==ext :
             control.write('v')
-        elif '.ppt' in filePath:
-            control.write('p')
-        elif '.png' in filePath or '.jpg' in filePath\
-                or '.jpeg' in filePath or '.bmp' in filePath :
+        # elif '.ppt'==ext :
+        #     control.write('p')
+        elif '.png'==ext or '.jpg'==ext \
+                or '.jpeg'==ext or '.bmp'==ext :
             control.write('i')
-        elif '.emc' in filePath:
+        elif '.emc'==ext :
             control.write('u')
+        elif '.zip'==ext :
+            control.write('z')
         else:
             control.close()
             return False
@@ -100,13 +108,26 @@ def transferFile(host,user,passwd,file):
         else:
             printMsg(exp)          # __str__ allows args to be printed directly,
         # pass
-
-
 def printMsg(msg):
     global _text
     _text.insert(END, msg)
     _text.insert(END, '\n')
     _text.see(END)
+def printTotals(transferred, toBeTransferred):
+    global _L2, _processRun,_srv,_progressBar
+    if _processRun == False:
+        _srv.close();
+    percent = float(transferred)/toBeTransferred*10000
+    progress = int(percent/100)
+    percent = 'Progress: %0.2f%s' % (percent/100,'%')
+    _L2['text']=percent
+    # print int(percent)
+    _progressBar["value"] = progress
+    # self.frame.update()
+    _root.update()
+def readPreference():
+
+    pass
 
 def openFile():
     global _filePath,_E1
@@ -140,11 +161,13 @@ def stop():
         _processRun = False
     else:
         printMsg('Process not running.')
+def hello():
+    pass
 def checkConn():
     global _statusBar,_host
     _statusBar.config(text="System Busy", bg="#cc0605", width=75)  # Status Red
     _root.update()
-    p1 = subprocess.Popen(['ping', _host], stdout=subprocess.PIPE)
+    p1 = subprocess.Popen(['ping', _host], stdout=subprocess.PIPE,shell=True)
     # Run the command
     output = p1.communicate()[0]
     if 'Lost = 0 (0% loss)' in output:
@@ -153,30 +176,8 @@ def checkConn():
         printMsg('Connection Error')
     _statusBar.config(text="System Ready", bg="#308446", width=75)  # Status Red
     _root.update()
-
-
 def openWebsite(event):
     webbrowser.open_new(r"http://electromed.co.in")
-
-def printTotals(transferred, toBeTransferred):
-    global _L2, _processRun,_srv,_progressBar
-    if _processRun == False:
-        _srv.close();
-    percent = float(transferred)/toBeTransferred*10000
-    progress = int(percent/100)
-    percent = 'Progress: %0.2f%s' % (percent/100,'%')
-    _L2['text']=percent
-    # print int(percent)
-    _progressBar["value"] = progress
-    # self.frame.update()
-    _root.update()
-
-def hello():
-    pass
-
-def readPreference():
-
-    pass
 def preferencesDialog():
     Preferences(_root)
     readPreference()
@@ -201,8 +202,6 @@ def createMenu():
 
     # display the menu
     _root.config(menu=menubar)
-
-
 def guiInit(master):
     global _E1,_L2,_statusBar,_text,_progressBar
     createMenu()
@@ -269,18 +268,15 @@ def guiInit(master):
     footer.image = img  # keep a reference!
     footer.grid(row=0)
 
-def init(master):
-    global _filePath
-    guiInit(master)
-    _filePath=''
 if __name__ == "__main__":
     global _host, _root, _username, _password
     _host = 'emTvUPCL001'
     # _username='emtvupcl001'
-    # _password='eM$7805!'
+    _password='eM$7805!'
     _username='pi'
-    _password='raspberry'
+    # _password='raspberry'
     _root = Tk()
     _root.title('emTv  Assistant')
+    _root.iconbitmap(default='data/transparent.ico')
     init(_root)
     _root.mainloop()
