@@ -58,6 +58,7 @@ if __name__ == "__main__":
     # GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(23,GPIO.OUT,initial=1)
     GPIO.output(23,1)
+    time.sleep(5)
     initiate()
     prev = 0
     while True:
