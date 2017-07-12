@@ -23,7 +23,16 @@ def run(c1,c2,dataFile):
     if c2 == 'z':
         # if os.path.isfile('current/%s'%dataFile):
         os.system('unzip -o -d current "current/%s"' % (dataFile))
-        # os.system('rm -f "current/%s"'%dataFile)
+
+        # Remove spaces from filenames
+        files = os.listdir('current')
+        for imageFile in files:
+            if not imageFile == '':
+                if '.zip' in imageFile:
+                    pass
+                else:
+                    nameWithoutSpace = imageFile.replace(' ','_')
+                    os.system('mv -f "current/%s" "current/%s"' %(imageFile,nameWithoutSpace))
         pqivx = Popen(['sudo fbi -T 1 --autodown -noverbose -t 10 `find current -iname \\*.jpg -o -iname \\*.png`'], shell=True)
         _player = True
     if c2 == 'u':
