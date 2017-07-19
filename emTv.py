@@ -272,9 +272,9 @@ if __name__ == "__main__":
     global _host, _root, _username, _password
     _host = 'emTvUPCL001'
     # _username='emtvupcl001'
-    _password='eM$7805!'
+    # _password='eM$7805!'
     _username='pi'
-    # _password='raspberry'
+    _password='raspberry'
     _root = Tk()
     _root.title('emTv  Assistant')
     _root.iconbitmap(default='data/transparent.ico')

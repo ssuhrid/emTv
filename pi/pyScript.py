@@ -33,7 +33,13 @@ def run(c1,c2,dataFile):
                 else:
                     nameWithoutSpace = imageFile.replace(' ','_')
                     os.system('mv -f "current/%s" "current/%s"' %(imageFile,nameWithoutSpace))
-        pqivx = Popen(['sudo fbi -T 1 --autodown -noverbose -t 10 `find current -iname \\*.jpg -o -iname \\*.png`'], shell=True)
+        for imageFile in files:
+            if '.JPG' in imageFile:
+                if 'Slide' in imageFile:
+                    number = imageFile[5:-4]
+                    newName= 'Slide%03d.jpg'%int(number)
+                    os.system('mv -f "current/%s" "current/%s"' % (imageFile,newName))
+        pqivx = Popen(['sudo fbi -T 1 --autodown -noverbose -t 10 `find current -iname \\*.jpg -o -iname \\*.png | sort -n`'], shell=True)
         _player = True
     if c2 == 'u':
         _player = False
@@ -120,7 +126,7 @@ if __name__ == "__main__":
                     # Kill current process
                     try:
                         os.system('killall omxplayer.bin')
-                        os.system('killall fbi')
+                        os.system('sudo killall fbi')
                     except Exception as exp:
                         print exp
 
